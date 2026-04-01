@@ -363,6 +363,37 @@ def generate_historical_data(locality: str, days: int = 365) -> pd.DataFrame:
     return pd.DataFrame(records)
 
 
+@st.cache_resource(show_spinner=False)
+def load_ml_model():
+    """Load and cache the ML model and preprocessor for ultra-fast inference"""
+    try:
+        import torch
+        from model_trainer import NHiTSModel, DataPreprocessor, DEFAULT_CONFIG
+        
+        model = NHiTSModel(
+            input_length=DEFAULT_CONFIG["input_length"],
+            output_length=DEFAULT_CONFIG["output_length"],
+            hidden_dim=DEFAULT_CONFIG["hidden_dim"]
+        )
+        
+        model_path = os.path.join(os.path.dirname(__file__), "models", "ensemble_best.pt")
+        if not os.path.exists(model_path):
+            model_path = os.path.join(os.path.dirname(__file__), "models", "ensemble_model.pt")
+        if not os.path.exists(model_path):
+            model_path = os.path.join(os.path.dirname(__file__), "models", "nhits_model.pt")
+            
+        if os.path.exists(model_path):
+            checkpoint = torch.load(model_path, map_location="cpu", weights_only=False)
+            if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
+                model.load_state_dict(checkpoint["model_state_dict"])
+            else:
+                model.load_state_dict(checkpoint)
+            model.eval()
+            return model, DataPreprocessor(), DEFAULT_CONFIG
+    except Exception as e:
+        logger.warning(f"Failed to load ML model: {e}")
+    return None, None, None
+
 @st.cache_data(ttl="1h", show_spinner=False)
 def generate_forecast(locality: str, days: int = 30) -> List[Dict]:
     # Need enough data for input_length (720 hours = 30 days)
@@ -378,45 +409,22 @@ def generate_forecast(locality: str, days: int = 30) -> List[Dict]:
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     confidence_bands = [0.08, 0.12, 0.15, 0.15, 0.15]
 
-    try:
-        import torch
-        import numpy as np
-        from model_trainer import NHiTSModel, DataPreprocessor, DEFAULT_CONFIG
-        
-        # Get last 720 hours
-        recent_data = historical.tail(720).copy()
-        
-        # Ensure only numeric columns are used (important for scaler)
-        numeric_data = recent_data.select_dtypes(include=[np.number])
-        
-        preprocessor = DataPreprocessor()
-        target_col = "demand_mw"
-        
-        if len(numeric_data) >= 720:
-            preprocessor.fit_scalers(numeric_data, target_col)
-            X, _ = preprocessor.transform(numeric_data, target_col)
+    model, preprocessor, config = load_ml_model()
+    
+    if model and preprocessor:
+        try:
+            import torch
+            import numpy as np
             
-            model = NHiTSModel(
-                input_length=DEFAULT_CONFIG["input_length"],
-                output_length=DEFAULT_CONFIG["output_length"],
-                hidden_dim=DEFAULT_CONFIG["hidden_dim"]
-            )
+            # Get last 720 hours
+            recent_data = historical.tail(720).copy()
+            numeric_data = recent_data.select_dtypes(include=[np.number])
+            target_col = "demand_mw"
             
-            model_path = os.path.join(os.path.dirname(__file__), "models", "ensemble_best.pt")
-            if not os.path.exists(model_path):
-                model_path = os.path.join(os.path.dirname(__file__), "models", "ensemble_model.pt")
-            if not os.path.exists(model_path):
-                # Fallback to nhits if ensemble not available
-                model_path = os.path.join(os.path.dirname(__file__), "models", "nhits_model.pt")
+            if len(numeric_data) >= 720:
+                preprocessor.fit_scalers(numeric_data, target_col)
+                X, _ = preprocessor.transform(numeric_data, target_col)
                 
-            if os.path.exists(model_path):
-                checkpoint = torch.load(model_path, map_location="cpu", weights_only=False)
-                if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
-                    model.load_state_dict(checkpoint["model_state_dict"])
-                else:
-                    model.load_state_dict(checkpoint)
-                
-                model.eval()
                 with torch.no_grad():
                     input_seq = torch.FloatTensor(X).unsqueeze(0)
                     pred = model(input_seq)
@@ -426,7 +434,6 @@ def generate_forecast(locality: str, days: int = 30) -> List[Dict]:
                 # Aggregate hourly into daily
                 for d_idx in range(days):
                     d = today + timedelta(days=d_idx + 1)
-                    # Take 24 hours for this day
                     day_start = d_idx * 24
                     day_end = day_start + 24
                     
@@ -436,27 +443,22 @@ def generate_forecast(locality: str, days: int = 30) -> List[Dict]:
                     else:
                         daily_avg_demand = historical["demand_mw"].mean()
 
-                    seed = (30 + d_idx) * 17 + 31
-                    weather = generate_weather(locality, d, seed)
-
-                    predictions.append(
-                        {
-                            "date": d.strftime("%Y-%m-%d"),
-                            "demand_mw": int(daily_avg_demand),
-                            "confidence": 95,
-                            "temperature": weather["temperature"],
-                            "humidity": weather["humidity"],
-                            "wind_speed": weather["wind_speed"],
-                            "upper_bound": int(daily_avg_demand * 1.05),
-                            "lower_bound": int(daily_avg_demand * 0.95),
-                            "historical_avg": int(historical["demand_mw"].mean()),
-                            "weather_condition": weather["weather_condition"],
-                        }
-                    )
+                    weather = generate_weather(locality, d, (30 + d_idx) * 17 + 31)
+                    predictions.append({
+                        "date": d.strftime("%Y-%m-%d"),
+                        "demand_mw": int(daily_avg_demand),
+                        "confidence": 95,
+                        "temperature": weather["temperature"],
+                        "humidity": weather["humidity"],
+                        "wind_speed": weather["wind_speed"],
+                        "upper_bound": int(daily_avg_demand * 1.05),
+                        "lower_bound": int(daily_avg_demand * 0.95),
+                        "historical_avg": int(historical["demand_mw"].mean()),
+                        "weather_condition": weather["weather_condition"],
+                    })
                 return predictions
-    except (ImportError, OSError, Exception) as e:
-        logger.warning(f"ML Forecasting unavailable (PyTorch issue): {e}")
-        pass
+        except Exception as e:
+            logger.warning(f"ML inference failed: {e}")
 
     for i in range(days):
         d = today + timedelta(days=i + 1)
@@ -630,7 +632,8 @@ class ElectricityForecastApp:
         if "model_metrics" not in st.session_state:
             st.session_state.model_metrics = self.load_model_metrics()
 
-    def load_model_metrics(self) -> Optional[Dict]:
+    @st.cache_data(ttl="1h", show_spinner=False)
+    def load_model_metrics(_self) -> Optional[Dict]:
         """Load accuracy metrics from the trained ensemble model (or JSON fallback)"""
         # Try loading from JSON first (Torch-free)
         metrics_json_path = os.path.join(os.path.dirname(__file__), "models", "metrics.json")
