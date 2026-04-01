@@ -26,14 +26,19 @@ logger = logging.getLogger("TrainHighAccuracy")
 
 def train_for_accuracy():
     # 1. Load data
-    if not os.path.exists('synthetic_demand.csv'):
-        from generate_data import generate_synthetic_data
-        logger.info("Generating synthetic data...")
-        df = generate_synthetic_data(days=365)
-        df.to_csv('synthetic_demand.csv', index=False)
+    # 1. Load data
+    if not os.path.exists('actual_demand.csv'):
+        from Weather import fetch_actual_data
+        logger.info("Fetching real historical demand data...")
+        df = fetch_actual_data()
+        if not df.empty:
+            df.to_csv('actual_demand.csv', index=False)
+        else:
+            logger.error("Failed to fetch real data.")
+            return
     else:
-        logger.info("Loading existing synthetic_demand.csv...")
-        df = pd.read_csv('synthetic_demand.csv')
+        logger.info("Loading existing actual_demand.csv...")
+        df = pd.read_csv('actual_demand.csv')
     
     logger.info(f"Loaded {len(df)} rows of data")
     
