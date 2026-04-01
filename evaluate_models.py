@@ -21,7 +21,7 @@ logger = logging.getLogger("Evaluator")
 def evaluate():
     # 1. Load data
     if not os.path.exists('actual_demand.csv'):
-        from Weather import fetch_actual_data
+        from actual import fetch_actual_data
         df = fetch_actual_data()
         df.to_csv('actual_demand.csv', index=False)
     else:
@@ -101,3 +101,4 @@ def evaluate():
 
 if __name__ == "__main__":
     evaluate()
+
