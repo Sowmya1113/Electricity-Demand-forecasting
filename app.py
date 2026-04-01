@@ -256,8 +256,16 @@ def fetch_real_india_demand() -> pd.DataFrame:
     PURPOSE: Replace synthetic city demand with real national data
     """
     try:
+        csv_path = os.path.join(os.path.dirname(__file__), "actual_demand.csv")
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+            df["datetime"] = pd.to_datetime(df["datetime"])
+            df["date"] = df["datetime"].dt.strftime("%Y-%m-%d")
+            df["weather_condition"] = "actual"
+            df["locality"] = "India (National)"
+            return df.sort_values("datetime")
+            
         ember_client = EmberEnergyClient()
-        # Fetch data since 2021
         df = ember_client.fetch_generation_mix("IND", start_date="2021-01-01")
         
         if df.empty:
