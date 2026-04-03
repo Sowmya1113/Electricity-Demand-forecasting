@@ -24,7 +24,7 @@ from streamlit_option_menu import option_menu
 from data_pipeline import EmberEnergyClient
 
 st.set_page_config(
-    page_title="Electricity Demand Forecaster",
+    page_title="⚡ Electricity Demand Forecaster",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -35,165 +35,165 @@ st.set_page_config(
 # INDIAN CITIES DATA (from reference project)
 # ============================================
 LOCALITY_PROFILES = {
-    "Mumbai, MH": {
-        "base_demand": 4500,
+    "Ahmedabad, GJ": {
+        "base_demand": 5000,
+        "humid_coef": 11,
+        "lat": 23.03,
+        "lng": 72.59,
         "temp_coef": 55,
-        "humid_coef": 8,
-        "wind_coef": -10,
-        "lat": 19.08,
-        "lng": 72.88,
-    },
-    "Delhi, DL": {
-        "base_demand": 12000,
-        "temp_coef": 90,
-        "humid_coef": 6,
-        "wind_coef": -20,
-        "lat": 28.61,
-        "lng": 77.21,
+        "wind_coef": 55,
     },
     "Bengaluru, KA": {
         "base_demand": 8000,
-        "temp_coef": 60,
-        "humid_coef": 5,
-        "wind_coef": -12,
+        "humid_coef": 36,
         "lat": 12.97,
         "lng": 77.59,
-    },
-    "Chennai, TN": {
-        "base_demand": 6000,
-        "temp_coef": 70,
-        "humid_coef": 9,
-        "wind_coef": -8,
-        "lat": 13.08,
-        "lng": 80.27,
-    },
-    "Kolkata, WB": {
-        "base_demand": 5500,
-        "temp_coef": 65,
-        "humid_coef": 7,
-        "wind_coef": -12,
-        "lat": 22.57,
-        "lng": 88.36,
-    },
-    "Hyderabad, TS": {
-        "base_demand": 7000,
-        "temp_coef": 72,
-        "humid_coef": 6,
-        "wind_coef": -14,
-        "lat": 17.39,
-        "lng": 78.49,
-    },
-    "Ahmedabad, GJ": {
-        "base_demand": 5000,
-        "temp_coef": 80,
-        "humid_coef": 4,
-        "wind_coef": -16,
-        "lat": 23.03,
-        "lng": 72.59,
-    },
-    "Pune, MH": {
-        "base_demand": 5800,
-        "temp_coef": 58,
-        "humid_coef": 5,
-        "wind_coef": -11,
-        "lat": 18.52,
-        "lng": 73.86,
-    },
-    "Jaipur, RJ": {
-        "base_demand": 4200,
-        "temp_coef": 82,
-        "humid_coef": 4,
-        "wind_coef": -15,
-        "lat": 26.91,
-        "lng": 75.79,
-    },
-    "Lucknow, UP": {
-        "base_demand": 4000,
-        "temp_coef": 85,
-        "humid_coef": 6,
-        "wind_coef": -18,
-        "lat": 26.85,
-        "lng": 80.95,
-    },
-    "Chandigarh, CH": {
-        "base_demand": 1800,
-        "temp_coef": 83,
-        "humid_coef": 5,
-        "wind_coef": -16,
-        "lat": 30.74,
-        "lng": 76.79,
-    },
-    "Kochi, KL": {
-        "base_demand": 2200,
-        "temp_coef": 58,
-        "humid_coef": 10,
-        "wind_coef": -8,
-        "lat": 9.93,
-        "lng": 76.26,
-    },
-    "Indore, MP": {
-        "base_demand": 2800,
-        "temp_coef": 77,
-        "humid_coef": 5,
-        "wind_coef": -14,
-        "lat": 22.72,
-        "lng": 75.86,
+        "temp_coef": 339,
+        "wind_coef": 361,
     },
     "Bhopal, MP": {
         "base_demand": 2500,
-        "temp_coef": 76,
         "humid_coef": 5,
-        "wind_coef": -14,
         "lat": 23.26,
         "lng": 77.41,
+        "temp_coef": 30,
+        "wind_coef": 28,
     },
-    "Patna, BR": {
-        "base_demand": 2500,
-        "temp_coef": 82,
-        "humid_coef": 7,
-        "wind_coef": -16,
-        "lat": 25.6,
-        "lng": 85.1,
+    "Chandigarh, CH": {
+        "base_demand": 1800,
+        "humid_coef": 2,
+        "lat": 30.74,
+        "lng": 76.79,
+        "temp_coef": 18,
+        "wind_coef": 8,
     },
-    "Surat, GJ": {
-        "base_demand": 3500,
-        "temp_coef": 76,
-        "humid_coef": 7,
-        "wind_coef": -14,
-        "lat": 21.17,
-        "lng": 72.83,
-    },
-    "Vadodara, GJ": {
-        "base_demand": 3000,
-        "temp_coef": 78,
-        "humid_coef": 5,
-        "wind_coef": -15,
-        "lat": 22.31,
-        "lng": 73.18,
-    },
-    "Rajkot, GJ": {
-        "base_demand": 2200,
-        "temp_coef": 80,
-        "humid_coef": 4,
-        "wind_coef": -16,
-        "lat": 22.3,
-        "lng": 70.8,
-    },
-    "Nagpur, MH": {
-        "base_demand": 3200,
-        "temp_coef": 75,
-        "humid_coef": 5,
-        "wind_coef": -12,
-        "lat": 21.14,
-        "lng": 79.08,
+    "Chennai, TN": {
+        "base_demand": 6000,
+        "humid_coef": 13,
+        "lat": 13.08,
+        "lng": 80.27,
+        "temp_coef": 314,
+        "wind_coef": 7,
     },
     "Coimbatore, TN": {
         "base_demand": 2800,
-        "temp_coef": 65,
-        "humid_coef": 6,
-        "wind_coef": -10,
+        "humid_coef": 25,
         "lat": 11.02,
         "lng": 76.96,
+        "temp_coef": 241,
+        "wind_coef": 368,
+    },
+    "Delhi, DL": {
+        "base_demand": 12000,
+        "humid_coef": 21,
+        "lat": 28.61,
+        "lng": 77.21,
+        "temp_coef": 109,
+        "wind_coef": 60,
+    },
+    "Hyderabad, TS": {
+        "base_demand": 7000,
+        "humid_coef": 22,
+        "lat": 17.39,
+        "lng": 78.49,
+        "temp_coef": 142,
+        "wind_coef": 151,
+    },
+    "Indore, MP": {
+        "base_demand": 2800,
+        "humid_coef": 5,
+        "lat": 22.72,
+        "lng": 75.86,
+        "temp_coef": 34,
+        "wind_coef": 39,
+    },
+    "Jaipur, RJ": {
+        "base_demand": 4200,
+        "humid_coef": 7,
+        "lat": 26.91,
+        "lng": 75.79,
+        "temp_coef": 32,
+        "wind_coef": 32,
+    },
+    "Kochi, KL": {
+        "base_demand": 2200,
+        "humid_coef": 11,
+        "lat": 9.93,
+        "lng": 76.26,
+        "temp_coef": 41,
+        "wind_coef": 185,
+    },
+    "Kolkata, WB": {
+        "base_demand": 5500,
+        "humid_coef": 13,
+        "lat": 22.57,
+        "lng": 88.36,
+        "temp_coef": 74,
+        "wind_coef": 82,
+    },
+    "Lucknow, UP": {
+        "base_demand": 4000,
+        "humid_coef": 7,
+        "lat": 26.85,
+        "lng": 80.95,
+        "temp_coef": 39,
+        "wind_coef": 27,
+    },
+    "Mumbai, MH": {
+        "base_demand": 4500,
+        "humid_coef": 16,
+        "lat": 19.08,
+        "lng": 72.88,
+        "temp_coef": 101,
+        "wind_coef": 116,
+    },
+    "Nagpur, MH": {
+        "base_demand": 3200,
+        "humid_coef": 8,
+        "lat": 21.14,
+        "lng": 79.08,
+        "temp_coef": 50,
+        "wind_coef": 43,
+    },
+    "Patna, BR": {
+        "base_demand": 2500,
+        "humid_coef": 4,
+        "lat": 25.6,
+        "lng": 85.1,
+        "temp_coef": 24,
+        "wind_coef": 24,
+    },
+    "Pune, MH": {
+        "base_demand": 5800,
+        "humid_coef": 14,
+        "lat": 18.52,
+        "lng": 73.86,
+        "temp_coef": 110,
+        "wind_coef": 151,
+    },
+    "Rajkot, GJ": {
+        "base_demand": 2200,
+        "humid_coef": 5,
+        "lat": 22.3,
+        "lng": 70.8,
+        "temp_coef": 15,
+        "wind_coef": 24,
+    },
+    "Surat, GJ": {
+        "base_demand": 3500,
+        "humid_coef": 9,
+        "lat": 21.17,
+        "lng": 72.83,
+        "temp_coef": 46,
+        "wind_coef": 43,
+    },
+    "Vadodara, GJ": {
+        "base_demand": 3000,
+        "humid_coef": 6,
+        "lat": 22.31,
+        "lng": 73.18,
+        "temp_coef": 36,
+        "wind_coef": 33,
     },
 }
 
@@ -264,35 +264,35 @@ def fetch_real_india_demand() -> pd.DataFrame:
             df["weather_condition"] = "actual"
             df["locality"] = "India (National)"
             return df.sort_values("datetime")
-            
+
         ember_client = EmberEnergyClient()
         df = ember_client.fetch_generation_mix("IND", start_date="2021-01-01")
-        
+
         if df.empty:
             return pd.DataFrame()
-        
+
         # Filter for the 'Demand' series
         demand_df = df[df["series"] == "Demand"].copy()
-        
+
         if demand_df.empty:
             return pd.DataFrame()
-            
+
         # Convert Monthly Generation (TWh) to Average Power (MW)
         # 1 TWh = 1,000,000 MWh
         # MW = MWh / Hours (approx 730 per month)
         demand_df["demand_mw"] = (demand_df["generation_twh"] * 1000000) / 730
-        
+
         # Format for dashboard compatibility
         demand_df = demand_df.rename(columns={"date": "datetime"})
         demand_df["date"] = demand_df["datetime"].dt.strftime("%Y-%m-%d")
-        
+
         # Add placeholder weather just to satisfy UI requirements
         demand_df["temperature"] = 25.0
         demand_df["humidity"] = 60
         demand_df["wind_speed"] = 12.0
         demand_df["weather_condition"] = "sunny"
         demand_df["locality"] = "India (National)"
-        
+
         return demand_df.sort_values("datetime")
     except Exception as e:
         logger.error(f"Failed to fetch real demand: {e}")
@@ -306,12 +306,12 @@ def generate_historical_data(locality: str, days: int = 365) -> pd.DataFrame:
         real_df = fetch_real_india_demand()
         if not real_df.empty:
             return real_df
-        
+
     # 2. Fallback to city profiles (Synthetic)
     profile = LOCALITY_PROFILES.get(locality)
     if not profile:
         # Emergency fallback to a default profile if locality not found
-        profile = LOCALITY_PROFILES.get("Mumbai, MH") 
+        profile = LOCALITY_PROFILES.get("Mumbai, MH")
 
     records = []
     end_date = datetime.now()
@@ -325,20 +325,25 @@ def generate_historical_data(locality: str, days: int = 365) -> pd.DataFrame:
 
         hour_of_day = current.hour
         hourly_factor = 1.0 + 0.15 * math.sin(2 * math.pi * (hour_of_day - 6) / 24)
-        
+
         dow = current.weekday()
         is_weekend = dow >= 5
         weekend_factor = 0.88 if is_weekend else 1.0
-        
+
         noise = (seeded_random(hour_idx * 13 + 7) - 0.5) * 50
         year_trend = (current.year - 2021) * 60 / (365 * 24)
 
         demand = (
-            profile["base_demand"]
-            + profile["temp_coef"] * weather["temperature"]
-            + profile["humid_coef"] * weather["humidity"]
-            + profile["wind_coef"] * weather["wind_speed"]
-        ) * hourly_factor + year_trend + noise
+            (
+                profile["base_demand"]
+                + profile["temp_coef"] * weather["temperature"]
+                + profile["humid_coef"] * weather["humidity"]
+                + profile["wind_coef"] * weather["wind_speed"]
+            )
+            * hourly_factor
+            + year_trend
+            + noise
+        )
 
         final_demand = max(800, round(demand * weekend_factor))
 
@@ -369,19 +374,25 @@ def load_ml_model():
     try:
         import torch
         from model_trainer import NHiTSModel, DataPreprocessor, DEFAULT_CONFIG
-        
+
         model = NHiTSModel(
             input_length=DEFAULT_CONFIG["input_length"],
             output_length=DEFAULT_CONFIG["output_length"],
-            hidden_dim=DEFAULT_CONFIG["hidden_dim"]
+            hidden_dim=DEFAULT_CONFIG["hidden_dim"],
         )
-        
-        model_path = os.path.join(os.path.dirname(__file__), "models", "ensemble_best.pt")
+
+        model_path = os.path.join(
+            os.path.dirname(__file__), "models", "ensemble_best.pt"
+        )
         if not os.path.exists(model_path):
-            model_path = os.path.join(os.path.dirname(__file__), "models", "ensemble_model.pt")
+            model_path = os.path.join(
+                os.path.dirname(__file__), "models", "ensemble_model.pt"
+            )
         if not os.path.exists(model_path):
-            model_path = os.path.join(os.path.dirname(__file__), "models", "nhits_model.pt")
-            
+            model_path = os.path.join(
+                os.path.dirname(__file__), "models", "nhits_model.pt"
+            )
+
         if os.path.exists(model_path):
             checkpoint = torch.load(model_path, map_location="cpu", weights_only=False)
             if isinstance(checkpoint, dict) and "model_state_dict" in checkpoint:
@@ -393,6 +404,7 @@ def load_ml_model():
     except Exception as e:
         logger.warning(f"Failed to load ML model: {e}")
     return None, None, None
+
 
 @st.cache_data(ttl="1h", show_spinner=False)
 def generate_forecast(locality: str, days: int = 30) -> List[Dict]:
@@ -410,21 +422,21 @@ def generate_forecast(locality: str, days: int = 30) -> List[Dict]:
     confidence_bands = [0.08, 0.12, 0.15, 0.15, 0.15]
 
     model, preprocessor, config = load_ml_model()
-    
+
     if model and preprocessor:
         try:
             import torch
             import numpy as np
-            
+
             # Get last 720 hours
             recent_data = historical.tail(720).copy()
             numeric_data = recent_data.select_dtypes(include=[np.number])
             target_col = "demand_mw"
-            
+
             if len(numeric_data) >= 720:
                 preprocessor.fit_scalers(numeric_data, target_col)
                 X, _ = preprocessor.transform(numeric_data, target_col)
-                
+
                 with torch.no_grad():
                     input_seq = torch.FloatTensor(X).unsqueeze(0)
                     pred = model(input_seq)
@@ -436,7 +448,7 @@ def generate_forecast(locality: str, days: int = 30) -> List[Dict]:
                     d = today + timedelta(days=d_idx + 1)
                     day_start = d_idx * 24
                     day_end = day_start + 24
-                    
+
                     if day_start < len(ml_pred):
                         day_slice = ml_pred[day_start:day_end]
                         daily_avg_demand = np.mean(day_slice)
@@ -444,18 +456,20 @@ def generate_forecast(locality: str, days: int = 30) -> List[Dict]:
                         daily_avg_demand = historical["demand_mw"].mean()
 
                     weather = generate_weather(locality, d, (30 + d_idx) * 17 + 31)
-                    predictions.append({
-                        "date": d.strftime("%Y-%m-%d"),
-                        "demand_mw": int(daily_avg_demand),
-                        "confidence": 95,
-                        "temperature": weather["temperature"],
-                        "humidity": weather["humidity"],
-                        "wind_speed": weather["wind_speed"],
-                        "upper_bound": int(daily_avg_demand * 1.05),
-                        "lower_bound": int(daily_avg_demand * 0.95),
-                        "historical_avg": int(historical["demand_mw"].mean()),
-                        "weather_condition": weather["weather_condition"],
-                    })
+                    predictions.append(
+                        {
+                            "date": d.strftime("%Y-%m-%d"),
+                            "demand_mw": int(daily_avg_demand),
+                            "confidence": 95,
+                            "temperature": weather["temperature"],
+                            "humidity": weather["humidity"],
+                            "wind_speed": weather["wind_speed"],
+                            "upper_bound": int(daily_avg_demand * 1.05),
+                            "lower_bound": int(daily_avg_demand * 0.95),
+                            "historical_avg": int(historical["demand_mw"].mean()),
+                            "weather_condition": weather["weather_condition"],
+                        }
+                    )
                 return predictions
         except Exception as e:
             logger.warning(f"ML inference failed: {e}")
@@ -636,10 +650,13 @@ class ElectricityForecastApp:
     def load_model_metrics(_self) -> Optional[Dict]:
         """Load accuracy metrics from the trained ensemble model (or JSON fallback)"""
         # Try loading from JSON first (Torch-free)
-        metrics_json_path = os.path.join(os.path.dirname(__file__), "models", "metrics.json")
+        metrics_json_path = os.path.join(
+            os.path.dirname(__file__), "models", "metrics.json"
+        )
         if os.path.exists(metrics_json_path):
             try:
                 import json
+
                 with open(metrics_json_path, "r") as f:
                     return json.load(f)
             except Exception as e:
@@ -651,7 +668,9 @@ class ElectricityForecastApp:
         except Exception as e:
             logger.warning(f"Could not load model metrics because Torch failed: {e}")
             # Final fallback: return a default high-accuracy state if models exist
-            if os.path.exists(os.path.join(os.path.dirname(__file__), "models", "ensemble_best.pt")):
+            if os.path.exists(
+                os.path.join(os.path.dirname(__file__), "models", "ensemble_best.pt")
+            ):
                 return {"accuracy": 97.42, "mape": 2.58, "rmse": 142.1, "r2": 0.985}
             return None
 
@@ -660,7 +679,9 @@ class ElectricityForecastApp:
             model_path = os.path.join(os.path.dirname(__file__), "models", p)
             if os.path.exists(model_path):
                 try:
-                    checkpoint = torch.load(model_path, map_location="cpu", weights_only=False)
+                    checkpoint = torch.load(
+                        model_path, map_location="cpu", weights_only=False
+                    )
                     # Try metadata first (from train_high_accuracy.py)
                     if "metadata" in checkpoint:
                         res = checkpoint["metadata"].get("metrics")
@@ -669,13 +690,13 @@ class ElectricityForecastApp:
                     # Try direct metrics (from ModelTrainer.save_checkpoint)
                     if "metrics" in checkpoint:
                         m = checkpoint["metrics"]
-                        
+
                         # Handle validation MAPE from ensemble_best.pt
                         mape_val = m.get("val_mape", m.get("mape", 100))
-                        
+
                         if "accuracy" not in m:
                             m["accuracy"] = max(0, 100 - mape_val)
-                            
+
                         # If the accuracy exceeds threshold (e.g. 97%), return it.
                         if m["accuracy"] > 85:
                             return m
@@ -688,22 +709,68 @@ class ElectricityForecastApp:
             st.title("⚡ Power Forecast")
             st.markdown("---")
 
-            st.session_state.locality = st.selectbox(
-                "Select City",
-                options=["India (National)"] + list(LOCALITY_PROFILES.keys()),
-                index=0 if "India (National)" in st.session_state.locality else (list(LOCALITY_PROFILES.keys()).index(st.session_state.locality) + 1 if st.session_state.locality in LOCALITY_PROFILES else 0),
+            location_type = st.radio(
+                "Location Type",
+                ["Select City", "Custom Coordinates"],
+                horizontal=True,
+                index=0,
             )
+
+            if location_type == "Select City":
+                st.session_state.locality = st.selectbox(
+                    "Select City",
+                    options=["India (National)"] + list(LOCALITY_PROFILES.keys()),
+                    index=0
+                    if "India (National)" in st.session_state.locality
+                    else (
+                        list(LOCALITY_PROFILES.keys()).index(st.session_state.locality)
+                        + 1
+                        if st.session_state.locality in LOCALITY_PROFILES
+                        else 0
+                    ),
+                )
+            else:
+                col1, col2 = st.columns(2)
+                with col1:
+                    custom_lat = st.number_input(
+                        "Latitude",
+                        value=28.6139,
+                        min_value=-90.0,
+                        max_value=90.0,
+                        step=0.01,
+                    )
+                with col2:
+                    custom_lng = st.number_input(
+                        "Longitude",
+                        value=77.2090,
+                        min_value=-180.0,
+                        max_value=180.0,
+                        step=0.01,
+                    )
+
+                custom_name = st.text_input("Location Name", value="Custom Location")
+
+                st.session_state.locality = custom_name
+                st.session_state.custom_coords = {"lat": custom_lat, "lng": custom_lng}
+
+                st.markdown("### 📍 Custom Location")
+                st.write(f"**Lat:** {custom_lat:.2f}°, **Lng:** {custom_lng:.2f}°")
 
             if st.session_state.locality == "India (National)":
                 st.markdown("### 📍 National Profile")
                 st.write("**Region:** India")
                 st.write("**Data Source:** Ember Energy API (Real)")
                 st.write("**Resolution:** Monthly")
-            else:
+            elif (
+                location_type == "Select City"
+                and st.session_state.locality in LOCALITY_PROFILES
+            ):
                 profile = LOCALITY_PROFILES[st.session_state.locality]
                 st.markdown("### 📍 City Info")
                 st.write(f"**Base Demand:** {profile['base_demand']} MW")
-                st.write(f"**Coordinates:** {profile['lat']:.2f}°, {profile['lng']:.2f}°")
+                st.write(
+                    f"**Coordinates:** {profile['lat']:.2f}°, {profile['lng']:.2f}°"
+                )
 
             st.markdown("---")
 
@@ -776,16 +843,19 @@ class ElectricityForecastApp:
         metrics = st.session_state.model_metrics
         if metrics:
             st.markdown("---")
-            acc_col1, acc_col2, acc_col3, acc_col4 = st.columns(4)
+            acc_col1, acc_col2, acc_col3, acc_col4, acc_col5 = st.columns(5)
             with acc_col1:
                 st.markdown(f"### 🎯 Model Accuracy: {metrics.get('accuracy', 0):.1f}%")
             with acc_col2:
                 st.write(f"**MAPE:** {metrics.get('mape', 0):.2f}%")
             with acc_col3:
-                st.write(f"**R2 Score:** {metrics.get('r2', 0):.4f}")
+                st.write(f"**RMSE:** {metrics.get('rmse', 0):.2f} MW")
             with acc_col4:
-                status = "✅ PASS" if metrics.get('accuracy', 0) >= 85 else "❌ FAIL"
-                st.write(f"**Status:** {status}")
+                st.write(f"**MAE:** {metrics.get('mae', 0):.2f} MW")
+            with acc_col5:
+                st.write(f"**R²:** {metrics.get('r2', 0):.4f}")
+            status = "✅ PASS" if metrics.get("accuracy", 0) >= 85 else "❌ FAIL"
+            st.write(f"**Status:** {status}")
 
         st.markdown("---")
 
@@ -869,7 +939,9 @@ class ElectricityForecastApp:
                             st.write(weather_icon)
                         with col_w2:
                             st.write(f"{pred['temperature']}°C")
-                            st.caption(f"{pred['humidity']}% humidity | {pred['wind_speed']:.1f} km/h wind")
+                            st.caption(
+                                f"{pred['humidity']}% humidity | {pred['wind_speed']:.1f} km/h wind"
+                            )
                         st.markdown("---")
 
         col1, col2 = st.columns(2)
@@ -1003,6 +1075,30 @@ class ElectricityForecastApp:
         csv = df.to_csv(index=False)
         st.download_button("📥 Download CSV", csv, "forecast.csv", "text/csv")
 
+        from utils import ExportHandler
+
+        exporter = ExportHandler()
+
+        if predictions:
+            pdf_data = {
+                "date": predictions[0]["date"],
+                "demand_mw": predictions[0]["demand_mw"],
+                "temperature": predictions[0]["temperature"],
+                "weather_condition": predictions[0]["weather_condition"],
+            }
+            pdf_bytes = exporter.export_to_pdf(
+                pdf_data,
+                st.session_state.model_metrics or {},
+                recommend_energy_source(predictions),
+                "forecast_report.pdf",
+            )
+            st.download_button(
+                "📄 Download PDF Report",
+                pdf_bytes,
+                "forecast_report.pdf",
+                "application/pdf",
+            )
+
     def show_history(self):
         st.title("📜 Historical Data")
 
@@ -1083,23 +1179,30 @@ class ElectricityForecastApp:
                     st.write(f"{source}: {'█' * int(bar_width / 10)} {score}%")
 
         st.markdown("### 📊 Energy Mix Forecast")
-        
+
         try:
             ember_client = EmberEnergyClient()
             with st.spinner("Calculating mix projection based on real data..."):
                 latest_shares = ember_client.get_latest_mix_percentages("IND")
-            
+
             # Filter for standard fuel categories
             fuel_categories = ["Coal", "Solar", "Wind", "Hydro", "Nuclear", "Gas"]
             base_mix = {cat: latest_shares.get(cat, 0) for cat in fuel_categories}
-            
+
             # Normalize if needed
             total = sum(base_mix.values())
             if total > 0:
-                base_mix = {k: (v/total)*100 for k, v in base_mix.items()}
+                base_mix = {k: (v / total) * 100 for k, v in base_mix.items()}
             else:
                 # Emergency fallback if API fails
-                base_mix = {"Coal": 70, "Solar": 10, "Wind": 5, "Hydro": 10, "Nuclear": 3, "Gas": 2}
+                base_mix = {
+                    "Coal": 70,
+                    "Solar": 10,
+                    "Wind": 5,
+                    "Hydro": 10,
+                    "Nuclear": 3,
+                    "Gas": 2,
+                }
 
             energy_data = []
             for p in predictions:
@@ -1109,14 +1212,14 @@ class ElectricityForecastApp:
                     day_mix["Solar"] *= 1.2
                 elif p["weather_condition"] == "cloudy":
                     day_mix["Solar"] *= 0.7
-                
+
                 if p["wind_speed"] > 15:
                     day_mix["Wind"] *= 1.3
-                
+
                 # Re-normalize to 100%
                 new_total = sum(day_mix.values())
-                day_mix = {k: (v/new_total)*100 for k, v in day_mix.items()}
-                
+                day_mix = {k: (v / new_total) * 100 for k, v in day_mix.items()}
+
                 day_mix["Date"] = p["date"]
                 energy_data.append(day_mix)
 
@@ -1128,9 +1231,11 @@ class ElectricityForecastApp:
                 y=fuel_categories,
                 title="Projected Energy Mix (%) Based on Real India Baseline",
                 barmode="stack",
-                color_discrete_sequence=px.colors.qualitative.T10
+                color_discrete_sequence=px.colors.qualitative.T10,
             )
-            fig.update_layout(template="plotly_white", height=400, yaxis_title="Percentage Share (%)")
+            fig.update_layout(
+                template="plotly_white", height=400, yaxis_title="Percentage Share (%)"
+            )
             st.plotly_chart(fig, use_container_width=True)
         except Exception as e:
             st.error(f"Could not generate mix forecast: {e}")
@@ -1140,52 +1245,68 @@ class ElectricityForecastApp:
         # New: Real-world Ember Energy Data for India
         st.markdown("---")
         st.subheader("🌐 Real-world India Generation Mix (Ember Energy)")
-        
+
         try:
             ember_client = EmberEnergyClient()
             with st.spinner("Fetching latest generation data for India..."):
                 mix_percentages = ember_client.get_latest_mix_percentages("IND")
-            
+
             if mix_percentages:
                 col1, col2 = st.columns([1, 1])
-                
+
                 # Filter out 'Total generation' and 'Demand' for pie chart
-                valid_sources = {k: v for k, v in mix_percentages.items() if k not in ["Total generation", "Demand"]}
-                
+                valid_sources = {
+                    k: v
+                    for k, v in mix_percentages.items()
+                    if k not in ["Total generation", "Demand"]
+                }
+
                 with col1:
                     st.write("**Latest Monthly Generation Share (%)**")
-                    mix_df = pd.DataFrame(list(valid_sources.items()), columns=["Source", "Percentage"])
+                    mix_df = pd.DataFrame(
+                        list(valid_sources.items()), columns=["Source", "Percentage"]
+                    )
                     mix_df = mix_df.sort_values("Percentage", ascending=False)
                     st.dataframe(mix_df, hide_index=True, use_container_width=True)
-                
+
                 with col2:
                     fig_pie = px.pie(
                         mix_df,
                         values="Percentage",
                         names="Source",
                         hole=0.4,
-                        color_discrete_sequence=px.colors.qualitative.Pastel
+                        color_discrete_sequence=px.colors.qualitative.Pastel,
                     )
                     fig_pie.update_layout(height=350, margin=dict(t=0, b=0, l=0, r=0))
                     st.plotly_chart(fig_pie, use_container_width=True)
-                
+
                 # Fetch historical trend
                 st.write("**Historical Generation Trend (India)**")
-                hist_df = ember_client.fetch_generation_mix("IND", start_date="2023-01-01")
+                hist_df = ember_client.fetch_generation_mix(
+                    "IND", start_date="2023-01-01"
+                )
                 if not hist_df.empty:
                     # Filter for clean fuel types for line chart
                     fuel_trend = hist_df[
-                        (hist_df["is_aggregate_series"] == False) & 
-                        (hist_df["series"].isin(["Coal", "Solar", "Wind", "Hydro", "Nuclear", "Gas"]))
+                        (hist_df["is_aggregate_series"] == False)
+                        & (
+                            hist_df["series"].isin(
+                                ["Coal", "Solar", "Wind", "Hydro", "Nuclear", "Gas"]
+                            )
+                        )
                     ]
-                    
+
                     fig_trend = px.line(
                         fuel_trend,
                         x="date",
                         y="generation_twh",
                         color="series",
                         title="Monthly Generation (TWh) by Fuel Type",
-                        labels={"generation_twh": "Generation (TWh)", "date": "Month", "series": "Fuel Type"}
+                        labels={
+                            "generation_twh": "Generation (TWh)",
+                            "date": "Month",
+                            "series": "Fuel Type",
+                        },
                     )
                     fig_trend.update_layout(height=400, template="plotly_white")
                     st.plotly_chart(fig_trend, use_container_width=True)
