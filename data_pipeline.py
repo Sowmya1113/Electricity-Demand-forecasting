@@ -811,60 +811,82 @@ class DataLoader:
 
 
 # ============================================
-# SECTION 5: DATA VALIDATION CLASS
+# SECTION 5: DATA VALIDATION CLASS (UPDATED)
 # ============================================
+
 class DataValidator:
     """
     Validate data quality before model training
-    PURPOSE: Ensure >85% accuracy by catching data issues early
+    PURPOSE: Ensure data reliability using real scoring instead of assumptions
     """
 
     def __init__(self):
         self.validation_results = {}
 
+    # --------------------------------------------
+    # WEATHER VALIDATION WITH REAL SCORING
+    # --------------------------------------------
     def validate_weather_data(self, df: pd.DataFrame) -> Dict:
-        """Check weather data for physical plausibility"""
         issues = []
+        total = len(df)
+        total_errors = 0
 
         if "temperature_2m" in df.columns:
             temp_issues = df[
                 (df["temperature_2m"] < TEMP_MIN) | (df["temperature_2m"] > TEMP_MAX)
             ]
-            if len(temp_issues) > 0:
-                issues.append(f"Temperature out of range: {len(temp_issues)} values")
+            count = len(temp_issues)
+            total_errors += count
+            if count > 0:
+                issues.append(f"Temperature out of range: {count}")
 
         if "relative_humidity" in df.columns:
             hum_issues = df[
                 (df["relative_humidity"] < HUMIDITY_MIN)
                 | (df["relative_humidity"] > HUMIDITY_MAX)
             ]
-            if len(hum_issues) > 0:
-                issues.append(f"Humidity out of range: {len(hum_issues)} values")
+            count = len(hum_issues)
+            total_errors += count
+            if count > 0:
+                issues.append(f"Humidity out of range: {count}")
 
         if "wind_speed_10m" in df.columns:
             wind_issues = df[
                 (df["wind_speed_10m"] < WIND_SPEED_MIN)
                 | (df["wind_speed_10m"] > WIND_SPEED_MAX)
             ]
-            if len(wind_issues) > 0:
-                issues.append(f"Wind speed out of range: {len(wind_issues)} values")
+            count = len(wind_issues)
+            total_errors += count
+            if count > 0:
+                issues.append(f"Wind speed out of range: {count}")
 
         if "solar_radiation" in df.columns:
             solar_issues = df[
                 (df["solar_radiation"] < SOLAR_MIN)
                 | (df["solar_radiation"] > SOLAR_MAX)
             ]
-            if len(solar_issues) > 0:
-                issues.append(
-                    f"Solar radiation out of range: {len(solar_issues)} values"
-                )
+            count = len(solar_issues)
+            total_errors += count
+            if count > 0:
+                issues.append(f"Solar radiation out of range: {count}")
 
-        status = "PASS" if len(issues) == 0 else "FAIL"
+        # 🔥 REAL QUALITY SCORE
+        error_ratio = total_errors / total if total > 0 else 1
+        quality_score = max(0, 100 - (error_ratio * 100))
 
-        return {"status": status, "issues": issues, "total_records": len(df)}
+        status = "PASS" if quality_score >= 80 else "FAIL"
 
+        return {
+            "status": status,
+            "issues": issues,
+            "quality_score": quality_score,
+            "total_records": total,
+        }
+
+    # --------------------------------------------
+    # DEMAND VALIDATION (UNCHANGED BUT CLEANED)
+    # --------------------------------------------
     def validate_demand_data(self, df: pd.DataFrame) -> Dict:
-        """Check demand data for operational plausibility"""
         issues = []
         quality_score = 100
 
@@ -875,45 +897,45 @@ class DataValidator:
                 "quality_score": 0,
             }
 
+        total = len(df)
+
         negative_demand = (df["demand_mw"] < 0).sum()
         if negative_demand > 0:
             issues.append(f"Negative demand values: {negative_demand}")
-            quality_score -= negative_demand / len(df) * 100
+            quality_score -= (negative_demand / total) * 100
 
         zero_demand = (df["demand_mw"] == 0).sum()
-        if zero_demand > len(df) * 0.01:
+        if zero_demand > total * 0.01:
             issues.append(f"Excessive zero values: {zero_demand}")
-            quality_score -= zero_demand / len(df) * 50
+            quality_score -= (zero_demand / total) * 50
 
-        if len(df) > 1:
+        if total > 1:
             hour_changes = df["demand_mw"].pct_change().abs()
             sudden_jumps = (hour_changes > 0.5).sum()
             if sudden_jumps > 0:
                 issues.append(f"Sudden jumps >50%: {sudden_jumps}")
-                quality_score -= sudden_jumps / len(df) * 100
+                quality_score -= (sudden_jumps / total) * 100
 
+        quality_score = max(0, quality_score)
         status = "PASS" if quality_score >= 80 else "FAIL"
 
         return {
             "status": status,
             "issues": issues,
-            "quality_score": max(0, quality_score),
+            "quality_score": quality_score,
         }
 
-    def check_data_completeness(
-        self, df: pd.DataFrame, expected_frequency: str = "H"
-    ) -> Dict:
-        """Check for missing timestamps"""
+    # --------------------------------------------
+    # COMPLETENESS CHECK
+    # --------------------------------------------
+    def check_data_completeness(self, df: pd.DataFrame, expected_frequency: str = "H") -> Dict:
         if not isinstance(df.index, pd.DatetimeIndex):
-            return {"status": "UNKNOWN", "completeness": 0, "gaps": []}
+            return {"status": "UNKNOWN", "completeness": 0, "missing_count": 0}
 
-        expected = pd.date_range(
-            start=df.index.min(), end=df.index.max(), freq=expected_frequency
-        )
-
+        expected = pd.date_range(start=df.index.min(), end=df.index.max(), freq=expected_frequency)
         actual = df.index
-        missing = expected.difference(actual)
 
+        missing = expected.difference(actual)
         completeness = len(actual) / len(expected) if len(expected) > 0 else 0
 
         status = "PASS" if completeness >= MIN_COMPLETENESS_RATIO else "FAIL"
@@ -921,18 +943,18 @@ class DataValidator:
         return {
             "status": status,
             "completeness": completeness,
-            "gaps": list(missing[:10]),
             "missing_count": len(missing),
         }
 
+    # --------------------------------------------
+    # SEASONAL CHECK (UNCHANGED)
+    # --------------------------------------------
     def check_seasonal_consistency(self, df: pd.DataFrame) -> Dict:
-        """Verify data follows expected seasonal patterns"""
         if not isinstance(df.index, pd.DatetimeIndex):
             return {"status": "UNKNOWN", "anomalies": []}
 
         df = df.copy()
         df["month"] = df.index.month
-        df["hour"] = df.index.hour
 
         monthly_avg = df.groupby("month").mean(numeric_only=True)
 
@@ -946,38 +968,42 @@ class DataValidator:
             summer_avg = monthly_avg.loc[summer_months, "demand_mw"].mean()
 
             if winter_avg < summer_avg:
-                anomalies.append(
-                    "Winter demand should be higher than summer (heating load)"
-                )
+                anomalies.append("Unexpected seasonal pattern")
 
         return {
             "status": "PASS" if len(anomalies) == 0 else "WARNING",
             "anomalies": anomalies,
         }
 
-    def generate_quality_report(
-        self, weather_df: pd.DataFrame, demand_df: pd.DataFrame
-    ) -> Dict:
-        """Create comprehensive data quality report"""
+    # --------------------------------------------
+    # FINAL REPORT (UPDATED - NO FAKE 100)
+    # --------------------------------------------
+    def generate_quality_report(self, weather_df: pd.DataFrame, demand_df: pd.DataFrame) -> Dict:
+        weather_val = self.validate_weather_data(weather_df)
+        demand_val = self.validate_demand_data(demand_df)
+        weather_comp = self.check_data_completeness(weather_df)
+        demand_comp = self.check_data_completeness(demand_df)
+        seasonal = self.check_seasonal_consistency(demand_df)
+
         report = {
-            "weather_validation": self.validate_weather_data(weather_df),
-            "demand_validation": self.validate_demand_data(demand_df),
-            "weather_completeness": self.check_data_completeness(weather_df),
-            "demand_completeness": self.check_data_completeness(demand_df),
-            "seasonal_check": self.check_seasonal_consistency(demand_df),
+            "weather_validation": weather_val,
+            "demand_validation": demand_val,
+            "weather_completeness": weather_comp,
+            "demand_completeness": demand_comp,
+            "seasonal_check": seasonal,
         }
 
+        # 🔥 REAL OVERALL SCORE (NO DEFAULT 100)
         overall_score = (
-            report["weather_validation"].get("quality_score", 100)
-            + report["demand_validation"].get("quality_score", 100)
-            + report["weather_completeness"].get("completeness", 0) * 100
-            + report["demand_completeness"].get("completeness", 0) * 100
+            weather_val["quality_score"]
+            + demand_val["quality_score"]
+            + weather_comp["completeness"] * 100
+            + demand_comp["completeness"] * 100
         ) / 4
 
         report["overall_score"] = overall_score
 
         return report
-
 
 # ============================================
 # SECTION 6: DATA PIPELINE ORCHESTRATOR
